@@ -6,4 +6,4 @@
 
 <p align="center">Collection of Blazor Micro Apps</p>
 
-<p align="center"><strong><a href="https://blazorapps.junian.dev/">Try It Online!</a></strong></p>
+<p align="center"><strong><a href="https://blazorapps.junian.dev/">Use It for FREE!</a></strong></p>
