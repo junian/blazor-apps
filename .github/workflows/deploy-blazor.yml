@@ -1,0 +1,44 @@
+name: Deploy Blazor to GitHub Pages
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'src/BlazorApps/**'
+  workflow_dispatch:
+jobs:
+  build:
+    if: ${{ github.repository == 'junian/blazor-apps' && github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 9.0.x
+    - name: publish website
+      run: dotnet publish src/BlazorApps/BlazorApps.csproj --configuration Release
+    - name: index.html base tag
+      run: sed -i 's/<base href="\/" \/>/<base href="\/blazor-apps\/" \/>/g' src/BlazorApps/bin/Release/publish/wwwroot/index.html
+    - name: 404.html
+      run: sed -i 's/\/?p=\//\/blazor-apps\/?p=\//g' src/BlazorApps/bin/Release/publish/wwwroot/404.html
+    - name: .nojekyll
+      run: touch src/BlazorApps/bin/Release/publish/wwwroot/.nojekyll
+    - name: CODEOWNERS
+      run: echo "* @junian" > src/BlazorApps/bin/Release/publish/wwwroot/CODEOWNERS
+    - name: Upload wwwroot
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: src/BlazorApps/bin/Release/publish/wwwroot
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
