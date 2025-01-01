@@ -1,13 +1,14 @@
 ﻿@page "/connect-four"
 @using BlazorApps.States
+@using System.Drawing
 @inject ConnectFourGameState State
 
 <HeadContent>
     <style>
         :root {
-            --board-bg: yellow;  /** the color of the board **/
-            --player1: red;      /** Player 1's piece color **/
-            --player2: blue;     /** Player 2's piece color **/
+            --board-bg: @ColorTranslator.ToHtml(BoardColor);
+            --player1: @ColorTranslator.ToHtml(Player1Color);
+            --player2: @ColorTranslator.ToHtml(Player2Color);
         }
     </style>
 </HeadContent>
@@ -88,6 +89,13 @@
         errorMessage = string.Empty;
         pieces = new string[42];
     }
+
+    [Parameter]
+    public Color BoardColor{get;set;} = ColorTranslator.FromHtml("yellow");
+    [Parameter]
+    public Color Player1Color {get;set;} = ColorTranslator.FromHtml("red");
+    [Parameter]
+    public Color Player2Color{get;set;} = ColorTranslator.FromHtml("blue");
 
     protected override Task OnInitializedAsync()
     {
