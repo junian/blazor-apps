@@ -39,8 +39,8 @@ jobs:
       run: dotnet publish src/BlazorApps/BlazorApps.csproj --configuration Release
     - name: index.html base tag
       run: sed -i 's/<base href="\/" \/>/<base href="\/blazor-apps\/" \/>/g' src/BlazorApps/bin/Release/net9.0/publish/wwwroot/index.html
-    # - name: 404.html
-    #   run: sed -i 's/\/?p=\//\/blazor-apps\/?p=\//g' src/BlazorApps/bin/Release/net9.0/publish/wwwroot/404.html
+    - name: 404.html
+      run: sed -i 's/\/?p=\//\/blazor-apps\/?p=\//g' src/BlazorApps/bin/Release/net9.0/publish/wwwroot/404.html
     - name: .nojekyll
       run: touch src/BlazorApps/bin/Release/net9.0/publish/wwwroot/.nojekyll
     - name: CODEOWNERS
