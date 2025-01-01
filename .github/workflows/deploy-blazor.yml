@@ -31,18 +31,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-dotnet@v3
+
+    # Checkout the code
+    - uses: actions/checkout@v4
+
+    # Install .NET SDK
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+    - name: Install .NET WebAssembly Tools
+      run: dotnet workload install wasm-tools
+
     - name: publish website
-      run: dotnet publish src/BlazorApps/BlazorApps.csproj --configuration Release
-    - name: index.html base tag
-      run: sed -i 's/<base href="\/" \/>/<base href="\/blazor-apps\/" \/>/g' src/BlazorApps/bin/Release/net9.0/publish/wwwroot/index.html
-    - name: 404.html
-      run: sed -i 's/\/?p=\//\/blazor-apps\/?p=\//g' src/BlazorApps/bin/Release/net9.0/publish/wwwroot/404.html
-    - name: .nojekyll
-      run: touch src/BlazorApps/bin/Release/net9.0/publish/wwwroot/.nojekyll
+      run: dotnet publish src/BlazorApps/BlazorApps.csproj --configuration Release -p:GHPages=true
     - name: CODEOWNERS
       run: echo "* @junian" > src/BlazorApps/bin/Release/net9.0/publish/wwwroot/CODEOWNERS
     - name: Upload all published files
