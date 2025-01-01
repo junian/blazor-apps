@@ -1,8 +1,29 @@
 ﻿@page "/connect-four"
 
+<HeadContent>
+    <style>
+        :root {
+            --board-bg: yellow;  /** the color of the board **/
+            --player1: red;      /** Player 1's piece color **/
+            --player2: blue;     /** Player 2's piece color **/
+        }
+    </style>
+</HeadContent>
+
 <PageTitle>Connect 4 Games</PageTitle>
 
 <h3>Board</h3>
+
+<div>
+   <div class="board">
+      @for (var i = 0; i < 42; i++)
+      {
+         <span class="container">
+            <span></span>
+         </span>
+      }
+   </div>
+</div>
 
 @code {
 
