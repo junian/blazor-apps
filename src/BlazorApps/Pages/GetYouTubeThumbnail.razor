@@ -1,6 +1,7 @@
 ﻿@page "/get-youtube-thumbnail"
 
 @using Microsoft.JSInterop
+@using System.Text.RegularExpressions
 
 <PageTitle>YouTube Thumbnail Extractor</PageTitle>
 
@@ -36,22 +37,28 @@
                 </div>
             }
             
-            <div class="mt-4 alert alert-danger" style="display: none;"></div>
+            @if(!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="mt-4 alert alert-danger">@errorMessage</div>
+            }
         </div>
     </div>
 </div>
 
 @code {
+    const string ThumbnailNotFoundErrorMessage = "Invalid YouTube URL. Please try again.";
+    private string errorMessage = string.Empty;
     private string YouTubeUrl { get; set; } = string.Empty;
     private List<string> ThumbnailUrls { get; set; } = new();
 
     private async Task ExtractThumbnails()
     {
+        errorMessage = string.Empty;
         ThumbnailUrls.Clear();
 
         try
         {
-            var videoId = ExtractVideoId(YouTubeUrl);
+            var videoId = ExtractVideoIdRegex(YouTubeUrl);
             if (!string.IsNullOrEmpty(videoId))
             {
                 ThumbnailUrls = new List<string>
@@ -63,10 +70,14 @@
                     $"https://img.youtube.com/vi/{videoId}/default.jpg",
                 };
             }
+            else
+            {
+                errorMessage = ThumbnailNotFoundErrorMessage;
+            }
         }
         catch
         {
-            // Handle invalid URL
+            errorMessage = ThumbnailNotFoundErrorMessage;
         }
 
         await Task.CompletedTask;
@@ -87,6 +98,19 @@
             }
         }
         return string.Empty;
+    }
+
+    private string ExtractVideoIdRegex(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) 
+            return string.Empty;
+
+        var regExp = new Regex(@"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*");
+        var match = regExp.Match(url);
+
+        return (match.Success && match.Groups[7].Value.Length == 11) 
+            ? match.Groups[7].Value 
+            : string.Empty;
     }
 
     private async Task CopyToClipboard(string text)
