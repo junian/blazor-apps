@@ -16,6 +16,12 @@
 
 <h1>Connect 4 Game</h1>
 
+<article>
+    @winnerMessage <button style="@ResetStyle" @onclick="ResetGame">Reset Game </button>
+    <br />
+    <span class="alert-danger">@errorMessage</span>
+    <span class="alert-info">@CurrentTurn</span>
+</article>
 <nav>
     @for(byte i=0;i<7;i++)
     {
@@ -41,13 +47,46 @@
 @code {
 
     private string[] pieces = new string[42];
+    private string winnerMessage = string.Empty;
+    private string errorMessage = string.Empty;
 
+    private string CurrentTurn => (winnerMessage == string.Empty)
+        ? $"Player {State.PlayerTurn}'s Turn"
+        : string.Empty;
+    private string ResetStyle => (winnerMessage == string.Empty)
+        ? $"display: none;"
+        : string.Empty;
+    
     private void PlayPiece(byte col)
     {
-        var player = State.PlayerTurn;
-        var turn = State.CurrentTurn;
-        var landingRow = State.PlayPiece(col);
-        pieces[turn] = $"player{player} col{col} drop{landingRow}";
+        errorMessage = string.Empty;
+        try
+        {
+            var player = State.PlayerTurn;
+            var turn = State.CurrentTurn;
+            var landingRow = State.PlayPiece(col);
+            pieces[turn] = $"player{player} col{col} drop{landingRow}";
+        }
+        catch(Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+        winnerMessage = State.CheckForWin() switch
+        {
+            ConnectFourGameState.WinState.Player1_Wins => "Player 1 Wins!",
+            ConnectFourGameState.WinState.Player2_Wins => "Player 2 Wins!",
+            ConnectFourGameState.WinState.Tie => "It's a tie!",
+            _ => "",
+        };
+    }
+
+    private void ResetGame()
+    {
+        State.ResetBoard();
+        winnerMessage = string.Empty;
+        errorMessage = string.Empty;
+        pieces = new string[42];
     }
 
     protected override Task OnInitializedAsync()
