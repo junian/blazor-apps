@@ -1,0 +1,75 @@
+﻿@page "/get-youtube-thumbnail"
+
+@using Microsoft.JSInterop
+
+<h1>YouTube Thumbnail Extractor</h1>
+
+<div>
+    <input @bind="YouTubeUrl" @bind:event="oninput" placeholder="Enter YouTube URL" class="form-control" />
+    <button @onclick="ExtractThumbnails" class="btn btn-primary mt-2">Get Thumbnails</button>
+</div>
+
+@if (ThumbnailUrls != null && ThumbnailUrls.Any())
+{
+    <h4 class="mt-4">Thumbnails:</h4>
+    <div class="thumbnails">
+        @foreach (var thumbnail in ThumbnailUrls)
+        {
+            <div class="thumbnail-item mb-3">
+                <img src="@thumbnail" alt="YouTube Thumbnail" class="img-thumbnail" style="max-width: 200px;" />
+                <div class="mt-2">
+                    <input class="form-control mb-2" value="@thumbnail" readonly />
+                    <button class="btn btn-secondary" @onclick="(() => CopyToClipboard(thumbnail))">Copy URL</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string YouTubeUrl { get; set; } = string.Empty;
+    private List<string> ThumbnailUrls { get; set; } = new();
+
+    private async Task ExtractThumbnails()
+    {
+        ThumbnailUrls.Clear();
+
+        try
+        {
+            var videoId = ExtractVideoId(YouTubeUrl);
+            if (!string.IsNullOrEmpty(videoId))
+            {
+                ThumbnailUrls = new List<string>
+                {
+                    $"https://img.youtube.com/vi/{videoId}/default.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/mqdefault.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/sddefault.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/maxresdefault.jpg"
+                };
+            }
+        }
+        catch
+        {
+            // Handle invalid URL
+        }
+    }
+
+    private string ExtractVideoId(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            return query.Get("v") ?? string.Empty;
+        }
+        return string.Empty;
+    }
+
+    private async Task CopyToClipboard(string text)
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+    }
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = default!;
+}
