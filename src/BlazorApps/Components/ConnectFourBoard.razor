@@ -1,5 +1,4 @@
-﻿@page "/connect-four"
-@using BlazorApps.States
+﻿@using BlazorApps.States
 @using System.Drawing
 @inject ConnectFourGameState State
 
@@ -12,10 +11,6 @@
         }
     </style>
 </HeadContent>
-
-<PageTitle>Connect 4 Game</PageTitle>
-
-<h1>Connect 4 Game</h1>
 
 <article>
     @winnerMessage <button style="@ResetStyle" @onclick="ResetGame">Reset Game </button>
