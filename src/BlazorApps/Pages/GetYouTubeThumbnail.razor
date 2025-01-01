@@ -2,29 +2,44 @@
 
 @using Microsoft.JSInterop
 
-<h1>YouTube Thumbnail Extractor</h1>
+<PageTitle>YouTube Thumbnail Extractor</PageTitle>
 
-<div>
-    <input @bind="YouTubeUrl" @bind:event="oninput" placeholder="Enter YouTube URL" class="form-control" />
-    <button @onclick="ExtractThumbnails" class="btn btn-primary mt-2">Get Thumbnails</button>
-</div>
-
-@if (ThumbnailUrls != null && ThumbnailUrls.Any())
-{
-    <h4 class="mt-4">Thumbnails:</h4>
-    <div class="thumbnails">
-        @foreach (var thumbnail in ThumbnailUrls)
-        {
-            <div class="thumbnail-item mb-3">
-                <img src="@thumbnail" alt="YouTube Thumbnail" class="img-thumbnail" style="max-width: 200px;" />
-                <div class="mt-2">
-                    <input class="form-control mb-2" value="@thumbnail" readonly />
-                    <button class="btn btn-secondary" @onclick="(() => CopyToClipboard(thumbnail))">Copy URL</button>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">YouTube Thumbnail Extractor</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form>
+                <div class="mb-3">
+                    <label for="youtubeUrl" class="form-label">Enter YouTube URL:</label>
+                    <input type="url" class="form-control" @bind="YouTubeUrl" @bind:event="oninput" required placeholder="https://www.youtube.com/watch?v=...">
                 </div>
-            </div>
-        }
+                <button type="submit" class="btn btn-primary" @onclick="ExtractThumbnails" @onclick:preventDefault="true">Extract Thumbnail</button>
+            </form>
+            @if (ThumbnailUrls != null && ThumbnailUrls.Any())
+            {
+                <div class="mt-4 text-center">
+                    <h3>Extracted Thumbnail:</h3>
+                    @foreach (var thumbnail in ThumbnailUrls)
+                    {
+                        <figure>
+                            <img src="@thumbnail" alt="YouTube Thumbnail" class="img-fluid mt-2 rounded shadow">
+                            <figcaption>
+                                <a href="@thumbnail" target="_blank">@thumbnail</a>
+                            </figcaption>
+                        </figure>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" @onclick="(() => CopyToClipboard(thumbnail))">Copy URL</button>
+                            <a href="@thumbnail" download="youtube_thumbnail.jpg" class="btn btn-success" target="_blank">Download</a>
+                        </div>
+                        <hr />
+                    }
+                </div>
+            }
+            
+            <div class="mt-4 alert alert-danger" style="display: none;"></div>
+        </div>
     </div>
-}
+</div>
 
 @code {
     private string YouTubeUrl { get; set; } = string.Empty;
@@ -42,10 +57,10 @@
                 ThumbnailUrls = new List<string>
                 {
                     $"https://img.youtube.com/vi/{videoId}/maxresdefault.jpg",
-                    $"https://img.youtube.com/vi/{videoId}/default.jpg",
                     $"https://img.youtube.com/vi/{videoId}/mqdefault.jpg",
-                    $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg",
                     $"https://img.youtube.com/vi/{videoId}/sddefault.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg",
+                    $"https://img.youtube.com/vi/{videoId}/default.jpg",
                 };
             }
         }
@@ -53,6 +68,8 @@
         {
             // Handle invalid URL
         }
+
+        await Task.CompletedTask;
     }
 
     private string ExtractVideoId(string url)
