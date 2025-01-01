@@ -1,4 +1,6 @@
 ﻿@page "/connect-four"
+@using BlazorApps.States
+@inject ConnectFourGameState State
 
 <HeadContent>
     <style>
@@ -22,9 +24,19 @@
             <span></span>
          </span>
       }
+      @for(var i=0;i<42;i++)
+      {
+        <span class="@pieces[i]"></span>
+      }
    </div>
 </div>
 
 @code {
 
+    private string[] pieces = new string[42];
+    protected override Task OnInitializedAsync()
+    {
+        State.ResetBoard();
+        return Task.CompletedTask;
+    }
 }
