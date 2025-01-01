@@ -75,25 +75,25 @@ span.container {
     box-shadow: 0 0 0 4px var(--player2);
 }
 .col0 {
-    left: calc(0em + 9px);
+    left: calc(0em + 0px);
 }
 .col1 {
-    left: calc(4em + 9px);
+    left: calc(4em + 0px);
 }
 .col2 {
-    left: calc(8em + 9px);
+    left: calc(8em + 0px);
 }
 .col3 {
-    left: calc(12em + 9px);
+    left: calc(12em + 0px);
 }
 .col4 {
-    left: calc(16em + 9px);
+    left: calc(16em + 0px);
 }
 .col5 {
-    left: calc(20em + 9px);
+    left: calc(20em + 0px);
 }
 .col6 {
-    left: calc(24em + 9px);
+    left: calc(24em + 0px);
 }
 .drop1 {
     animation-duration: 1s;
@@ -121,7 +121,7 @@ span.container {
 }
 @keyframes drop1 {
     100%, 75%, 90%, 97% {
-        transform: translateY(1.27em);
+        transform: translateY(0em);
     }
     80% {
         transform: translateY(0.4em);
@@ -135,7 +135,7 @@ span.container {
 }
 @keyframes drop2 {
     100%, 75%, 90%, 97% {
-        transform: translateY(5.27em);
+        transform: translateY(4em);
     }
     80% {
         transform: translateY(3.8em);
@@ -149,7 +149,7 @@ span.container {
 }
 @keyframes drop3 {
     100%, 75%, 90%, 97% {
-        transform: translateY(9.27em);
+        transform: translateY(8em);
     }
     80% {
         transform: translateY(7.2em);
@@ -163,7 +163,7 @@ span.container {
 }
 @keyframes drop4 {
     100%, 75%, 90%, 97% {
-        transform: translateY(13.27em);
+        transform: translateY(12em);
     }
     80% {
         transform: translateY(10.6em);
@@ -177,7 +177,7 @@ span.container {
 }
 @keyframes drop5 {
     100%, 75%, 90%, 97% {
-        transform: translateY(17.27em);
+        transform: translateY(16em);
     }
     80% {
         transform: translateY(14em);
@@ -191,7 +191,7 @@ span.container {
 }
 @keyframes drop6 {
     100%, 75%, 90%, 97% {
-        transform: translateY(21.27em);
+        transform: translateY(20em);
     }
     80% {
         transform: translateY(17.4em);
