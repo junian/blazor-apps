@@ -41,11 +41,11 @@
             {
                 ThumbnailUrls = new List<string>
                 {
+                    $"https://img.youtube.com/vi/{videoId}/maxresdefault.jpg",
                     $"https://img.youtube.com/vi/{videoId}/default.jpg",
                     $"https://img.youtube.com/vi/{videoId}/mqdefault.jpg",
                     $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg",
                     $"https://img.youtube.com/vi/{videoId}/sddefault.jpg",
-                    $"https://img.youtube.com/vi/{videoId}/maxresdefault.jpg"
                 };
             }
         }
@@ -59,8 +59,15 @@
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-            return query.Get("v") ?? string.Empty;
+            if (uri.Host == "www.youtube.com" || uri.Host == "youtube.com")
+            {
+                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                return query.Get("v") ?? string.Empty;
+            }
+            else if (uri.Host == "youtu.be")
+            {
+                return uri.AbsolutePath.TrimStart('/');
+            }
         }
         return string.Empty;
     }
