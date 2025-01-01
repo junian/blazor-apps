@@ -12,10 +12,17 @@
     </style>
 </HeadContent>
 
-<PageTitle>Connect 4 Games</PageTitle>
+<PageTitle>Connect 4 Game</PageTitle>
 
-<h3>Board</h3>
+<h1>Connect 4 Game</h1>
 
+<nav>
+    @for(byte i=0;i<7;i++)
+    {
+        var col =i;
+        <span title="Click to Player a piece" @onclick="() => PlayPiece(col)">▼</span>
+    }
+</nav>
 <div>
    <div class="board">
       @for (var i = 0; i < 42; i++)
@@ -34,6 +41,15 @@
 @code {
 
     private string[] pieces = new string[42];
+
+    private void PlayPiece(byte col)
+    {
+        var player = State.PlayerTurn;
+        var turn = State.CurrentTurn;
+        var landingRow = State.PlayPiece(col);
+        pieces[turn] = $"player{player} col{col} drop{landingRow}";
+    }
+
     protected override Task OnInitializedAsync()
     {
         State.ResetBoard();
