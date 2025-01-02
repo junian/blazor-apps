@@ -3,10 +3,40 @@
 @using Microsoft.JSInterop
 @using System.Text.RegularExpressions
 
-<PageTitle>YouTube Thumbnail Extractor</PageTitle>
+@inject NavigationManager NavManager
+
+@*
+<meta itemprop="name" Content="How to Call ChatGPT with the Google Voice App">
+<meta itemprop="description" Content="A simple guide on how to call ChatGPT for free using Google Voice.">
+<meta itemprop="datePublished" Content="2024-12-22T10:59:46+07:00">
+<meta itemprop="dateModified" Content="2024-12-23T11:15:28+07:00">
+<meta itemprop="wordCount" Content="67">
+<meta itemprop="image" Content="https://i.ytimg.com/vi/f0Gxo8OLLVU/maxresdefault.jpg">
+<meta itemprop="image" Content="https://i.ytimg.com/vi/f0Gxo8OLLVU/mqdefault.jpg">
+<meta itemprop="keywords" Content="chatgpt">
+*@
+
+<Meta Property="og:url" Content="@NavManager.Uri.ToString()" />
+<Meta Property="og:site_name" Content="Junian.Dev" />
+<Meta Property="og:title" Content="@PageTitle" />
+<Meta Property="og:description" Content="@PageDescription" />
+<Meta Property="og:locale" Content="en" />
+<Meta Property="og:type" Content="article" />
+<Meta Property="article:section" Content="tech" />
+<Meta Property="article:published_time" Content="2024-12-22T10:59:46+07:00" />
+<Meta Property="article:modified_time" Content="2024-12-23T11:15:28+07:00" />
+<Meta Property="article:tag" Content="blazor" />
+<Meta Property="og:image" Content="@PageImage" />
+
+<Meta Name="twitter:card" Content="summary_large_image" />
+<Meta Name="twitter:image" Content="@PageImage" />
+<Meta Name="twitter:title" Content="@PageTitle" />
+<Meta Name="twitter:description" Content="@PageDescription" />
+
+<PageTitle>@PageTitle</PageTitle>
 
 <div class="container mt-5">
-    <h1 class="text-center mb-4">YouTube Thumbnail Extractor</h1>
+    <h1 class="text-center mb-4">@PageTitle</h1>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <form>
@@ -46,6 +76,10 @@
 </div>
 
 @code {
+
+    private string PageTitle = "YouTube Thumbnail Extractor";
+    private string PageDescription = "A simple YouTube Thumnnail extractor written in C# and Blazor.";
+    private string PageImage = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi5qWF0Fn7CL8swGGaD81PU-JO9RxcsOgA9A84vvvHZ3H2zHhWv7nXS8kshaIIcyjlhRWxkD7VRbgGI8o7GuOkUtlpHsYiTok68rE7Q6k1R7gxPodviZvgdQNrbMY8jf0tmQj27c3-wbLhtXckfagvfvtUn6EOaFuMAg7XhaiKeRa3cIo2a4XkB2aduj-dW/s1600/youtube-thumbnail-extactor.jpg";
     const string ThumbnailNotFoundErrorMessage = "Invalid YouTube URL. Please try again.";
     private string errorMessage = string.Empty;
     private string YouTubeUrl { get; set; } = string.Empty;
