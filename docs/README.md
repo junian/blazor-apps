@@ -1,9 +1,11 @@
-<p align="center" >
-  <img width="15%" height="15%" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjxDMezeI3dAXuoWQGciX6fFPJCFtV8_lX_1SzAaDfAlL7EOT43MvrDqTHkFJIBP__MpDljWz8X0wmiC3m0k09XF4e_xpEtxFvDWCtQ6Vf9QE-YRjnfi_69grizjU2-AzzHHi8PbjuqzGaAhF9eNbHFSz9_LRkhjk0VMOL8Ip2OB7FgpLQ2ndKa7BJr-2t5/s1600/blazor-no-halo.png"></img>
-</p>
+<div align="center" >
+  
+  <img width="15%" height="15%" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi2ONSqybxbVngYtLQU-U1z2RaUxLQbNQcXpKRSOghCLY_K5Z6Qh4nYN50m0mlF0s3hv9Ow-bcxJzg5tI3-NwTOVxvh1YANcZxU-_lLoA53sQmWBJLrNHrCb8T3hyphenhyphenX6V-ulHBLOsiVsRZKYqGeyLS38iOdFknAgOHKT-mSpoxUbi8rFtnvhc-sjrGW9kZM/s1600/blazor-logo.png" />
 
-<h1 align="center">Blazor Apps by Junian.dev</h1>
+# Blazor Apps
 
-<p align="center">Collection of Blazor Micro Apps</p>
+Collection of Blazor Micro Apps.
 
-<p align="center"><strong><a href="https://www.junian.dev/blazor-apps/" target="_blank">Open Web App</a></strong></p>
+[**Open Web App**](https://www.junian.dev/blazor-apps/)
+
+</div>
