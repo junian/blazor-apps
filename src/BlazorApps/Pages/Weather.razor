@@ -1,4 +1,4 @@
-﻿@page "/weather/"
+﻿@page "/weather"
 @inject HttpClient Http
 
 <PageTitle>Weather</PageTitle>
@@ -13,35 +13,20 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <FluentDataGrid Id="weathergrid" Items="@forecasts" GridTemplateColumns="1fr 1fr 1fr 2fr" TGridItem=WeatherForecast>
+        <PropertyColumn Title="Date" Property="@(c => c!.Date)" Sortable="true" Align="Align.Start" />
+        <PropertyColumn Title="Temp. (C)" Property="@(c => c!.TemperatureC)" Sortable="true" Align="Align.Center" />
+        <PropertyColumn Title="Temp. (F)" Property="@(c => c!.TemperatureF)" Sortable="true" Align="Align.Center" />
+        <PropertyColumn Title="Summary" Property="@(c => c!.Summary)" Sortable="true" Align="Align.End" />
+    </FluentDataGrid>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private IQueryable<WeatherForecast>? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        forecasts = (await Http.GetFromJsonAsync<List<WeatherForecast>>("sample-data/weather.json"))!.AsQueryable();
     }
 
     public class WeatherForecast
