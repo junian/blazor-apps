@@ -1,5 +1,6 @@
 @page "/tools/guid"
 @using System.Text
+@inject IJSRuntime JSRuntime
 
 <PageTitle>GUID Generator</PageTitle>
 
@@ -21,7 +22,20 @@
                 <FluentRadio Value="@("X")">X - {0x00000000,0x0000,0x0000,{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}}</FluentRadio>
             </FluentRadioGroup>
 
-            <FluentButton Appearance="Appearance.Accent" OnClick="GenerateGuids">Generate GUID</FluentButton>
+            <FluentLabel>Case</FluentLabel>
+            <FluentRadioGroup @bind-Value="casing" Name="guidCasing" Orientation="Orientation.Horizontal">
+                <FluentRadio Value="@("Lower")">Lowercase</FluentRadio>
+                <FluentRadio Value="@("Upper")">UPPERCASE</FluentRadio>
+            </FluentRadioGroup>
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="GenerateGuids">Generate GUID</FluentButton>
+                @if (guids.Any())
+                {
+                    <FluentButton Appearance="Appearance.Neutral" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy</FluentButton>
+                }
+            </FluentStack>
+            
         </FluentStack>
     </FluentCard>
 
@@ -34,6 +48,7 @@
 @code {
     private int count = 1;
     private string format = "D";
+    private string casing = "Lower";
     private List<Guid> guids = new();
 
     private string FormattedOutput
@@ -45,7 +60,16 @@
             var sb = new StringBuilder();
             foreach (var guid in guids)
             {
-                sb.AppendLine(guid.ToString(format));
+                string result = guid.ToString(format);
+                if (casing == "Upper")
+                {
+                    result = result.ToUpper();
+                }
+                else
+                {
+                    result = result.ToLower();
+                }
+                sb.AppendLine(result);
             }
             return sb.ToString();
         }
@@ -61,6 +85,16 @@
         for (int i = 0; i < count; i++)
         {
             guids.Add(Guid.NewGuid());
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(FormattedOutput))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", FormattedOutput);
+            // Optional: Provide feedback to the user (e.g., toast notification) if desired, 
+            // but requirements just asked for the button.
         }
     }
 }
