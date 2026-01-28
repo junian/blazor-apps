@@ -1,0 +1,197 @@
+@page "/tools/file-hash"
+@using System.Security.Cryptography
+@using BlazorApps.Services
+@inject IClipboardService ClipboardService
+
+<PageTitle>File Hash Generator</PageTitle>
+
+<h1>File Hash Generator</h1>
+
+<p>Generate cryptographic hash from a file.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Select File</FluentLabel>
+            
+            <FluentInputFile Id="file-input"
+                             Mode="InputFileMode.Stream"
+                             Multiple="false"
+                             MaximumFileSize="@maxFileSize"
+                             OnCompleted="@OnCompleted"
+                             Accept="*/*"
+                             Style="height: 100px; border: 1px dashed var(--neutral-stroke-rest); border-radius: 4px;">
+                <ChildContent>
+                    <label for="file-input" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; cursor: pointer;">
+                        <FluentIcon Value="@(new Icons.Regular.Size24.ArrowUpload())" Color="Color.Fill" />
+                        <FluentLabel Class="margin-top: 8px;">Click to upload or drag a file here</FluentLabel>
+                    </label>
+                </ChildContent>
+            </FluentInputFile>
+            
+            @if (selectedFile != null)
+            {
+                <FluentLabel>Selected File: @selectedFile.Name (@(selectedFile.Size / 1024) KB)</FluentLabel>
+            }
+
+            <FluentSelect Items="@algorithms"
+                          OptionText="@(i => i)"
+                          @bind-Value="@selectedAlgorithm"
+                          Label="Hash Algorithm"
+                          Style="min-width: 200px;" />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="GenerateHash" Disabled="@(selectedFile == null || isLoading)">Generate Hash</FluentButton>
+            </FluentStack>
+            
+            @if (isLoading)
+            {
+                <FluentProgressRing />
+            }
+            
+             @if (!string.IsNullOrEmpty(errorMessage))
+             {
+                  <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                      @errorMessage
+                  </FluentMessageBar>
+             }
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputHash))
+    {
+        <FluentCard>
+             <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+                <FluentLabel>Output Hash</FluentLabel>
+                <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                    <FluentTextArea Value="@outputHash" ReadOnly="true" Rows="3" Style="width: 100%; font-family: monospace;" />
+                    <FluentButton Appearance="Appearance.Neutral" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy</FluentButton>
+                </FluentStack>
+                
+                <FluentDivider />
+                
+                <FluentLabel>Verify Hash</FluentLabel>
+                <FluentTextField @bind-Value="expectedHash" Placeholder="Enter expected hash..." Style="width: 100%;" @oninput="VerifyHash" />
+                
+                @if (!string.IsNullOrEmpty(verificationResult))
+                {
+                    <FluentMessageBar Title="Verification Result" Intent="@verificationIntent">
+                        @verificationResult
+                    </FluentMessageBar>
+                }
+            </FluentStack>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    private FluentInputFileEventArgs? selectedFile;
+    private string outputHash = "";
+    private string expectedHash = "";
+    private string selectedAlgorithm = "SHA-256";
+    private bool isLoading = false;
+    private string errorMessage = "";
+    private string verificationResult = "";
+    private MessageIntent verificationIntent = MessageIntent.Info;
+    
+    private List<string> algorithms = new() { "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
+    
+    // Max file size: 20MB
+    private long maxFileSize = 1024 * 1024 * 20;
+
+    private void OnCompleted(IEnumerable<FluentInputFileEventArgs> files)
+    {
+        selectedFile = files.FirstOrDefault();
+        outputHash = "";
+        expectedHash = "";
+        verificationResult = "";
+        errorMessage = "";
+        
+        if (selectedFile != null && selectedFile.ErrorMessage != null)
+        {
+            errorMessage = selectedFile.ErrorMessage;
+            selectedFile = null;
+        }
+    }
+
+    private async Task GenerateHash()
+    {
+        if (selectedFile == null || selectedFile.Stream == null) return;
+        
+        isLoading = true;
+        errorMessage = "";
+        outputHash = "";
+        verificationResult = "";
+        
+        try
+        {
+            // Reset stream position if possible, though FluentInputFile generally provides a fresh stream or we read it once.
+            // If the stream is not seekable, we might have issues re-reading if user clicks generate twice properly? 
+            // FluentInputFile with Mode=Stream generally writes to a temporary buffer stream.
+            
+            if (selectedFile.Stream.CanSeek)
+            {
+                selectedFile.Stream.Position = 0;
+            }
+            
+            using var memoryStream = new MemoryStream();
+            await selectedFile.Stream.CopyToAsync(memoryStream);
+            byte[] buffer = memoryStream.ToArray();
+
+            byte[] hashBytes = selectedAlgorithm switch
+            {
+                "MD5" => MD5.HashData(buffer),
+                "SHA-1" => SHA1.HashData(buffer),
+                "SHA-256" => SHA256.HashData(buffer),
+                "SHA-384" => SHA384.HashData(buffer),
+                "SHA-512" => SHA512.HashData(buffer),
+                _ => throw new NotImplementedException()
+            };
+
+            outputHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+            
+            if (!string.IsNullOrEmpty(expectedHash))
+            {
+                VerifyHash(new ChangeEventArgs { Value = expectedHash });
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error processing file: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void VerifyHash(ChangeEventArgs e)
+    {
+        expectedHash = e.Value?.ToString() ?? "";
+        
+        if (string.IsNullOrEmpty(expectedHash))
+        {
+             verificationResult = "";
+             return;
+        }
+        
+        if (string.Equals(outputHash, expectedHash.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            verificationResult = "Match! The generated hash matches the expected hash.";
+            verificationIntent = MessageIntent.Success;
+        }
+        else
+        {
+            verificationResult = "Mismatch. The hashes do not match.";
+            verificationIntent = MessageIntent.Error;
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputHash))
+        {
+            await ClipboardService.WriteTextAsync(outputHash);
+        }
+    }
+}
