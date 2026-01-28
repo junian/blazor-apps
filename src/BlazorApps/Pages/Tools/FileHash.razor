@@ -1,7 +1,7 @@
 @page "/tools/file-hash"
-@using System.Security.Cryptography
 @using BlazorApps.Services
 @inject IClipboardService ClipboardService
+@inject IHashService HashService
 
 <PageTitle>File Hash Generator</PageTitle>
 
@@ -94,7 +94,8 @@
     private string verificationResult = "";
     private MessageIntent verificationIntent = MessageIntent.Info;
     
-    private List<string> algorithms = new() { "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
+    // HashService supports all algorithms
+    private List<string> algorithms = new() { "MD5", "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
     
     // Max file size: 20MB
     private long maxFileSize = 1024 * 1024 * 20;
@@ -125,31 +126,14 @@
         
         try
         {
-            // Reset stream position if possible, though FluentInputFile generally provides a fresh stream or we read it once.
-            // If the stream is not seekable, we might have issues re-reading if user clicks generate twice properly? 
-            // FluentInputFile with Mode=Stream generally writes to a temporary buffer stream.
-            
             if (selectedFile.Stream.CanSeek)
             {
                 selectedFile.Stream.Position = 0;
             }
             
-            using var memoryStream = new MemoryStream();
-            await selectedFile.Stream.CopyToAsync(memoryStream);
-            byte[] buffer = memoryStream.ToArray();
+            // HashService accepts stream or byte array. Using stream async method.
+            outputHash = await HashService.ComputeHashAsync(selectedFile.Stream, selectedAlgorithm);
 
-            byte[] hashBytes = selectedAlgorithm switch
-            {
-                "MD5" => MD5.HashData(buffer),
-                "SHA-1" => SHA1.HashData(buffer),
-                "SHA-256" => SHA256.HashData(buffer),
-                "SHA-384" => SHA384.HashData(buffer),
-                "SHA-512" => SHA512.HashData(buffer),
-                _ => throw new NotImplementedException()
-            };
-
-            outputHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
-            
             if (!string.IsNullOrEmpty(expectedHash))
             {
                 VerifyHash(new ChangeEventArgs { Value = expectedHash });

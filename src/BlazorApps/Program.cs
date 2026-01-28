@@ -17,4 +17,5 @@ static void ConfigureServices(IServiceCollection services, string baseAddress)
     services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
     services.AddFluentUIComponents();
     services.AddScoped<IClipboardService, ClipboardService>();
+    services.AddScoped<IHashService, HashService>();
 }

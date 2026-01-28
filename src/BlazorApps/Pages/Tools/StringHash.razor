@@ -1,8 +1,7 @@
 @page "/tools/string-hash"
-@using System.Security.Cryptography
-@using System.Text
 @using BlazorApps.Services
 @inject IClipboardService ClipboardService
+@inject IHashService HashService
 
 <PageTitle>String Hash Generator</PageTitle>
 
@@ -44,7 +43,8 @@
     private string outputHash = "";
     private string selectedAlgorithm = "SHA-256";
     
-    private List<string> algorithms = new() { "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
+    // HashService supports all algorithms, ensuring consistency
+    private List<string> algorithms = new() { "MD5", "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
 
     private void GenerateHash()
     {
@@ -54,23 +54,14 @@
             return;
         }
 
-        byte[] inputBytes = Encoding.UTF8.GetBytes(inputText);
-        byte[] hashBytes;
-
-        using (HashAlgorithm algorithm = selectedAlgorithm switch
+        try
         {
-            "MD5" => MD5.Create(),
-            "SHA-1" => SHA1.Create(),
-            "SHA-256" => SHA256.Create(),
-            "SHA-384" => SHA384.Create(),
-            "SHA-512" => SHA512.Create(),
-            _ => throw new NotImplementedException()
-        })
-        {
-            hashBytes = algorithm.ComputeHash(inputBytes);
+            outputHash = HashService.ComputeHash(inputText, selectedAlgorithm);
         }
-
-        outputHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+        catch (Exception ex)
+        {
+            outputHash = $"Error: {ex.Message}";
+        }
     }
 
     private async Task CopyToClipboard()
