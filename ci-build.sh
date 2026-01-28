@@ -11,3 +11,5 @@ chmod +x dotnet-install.sh
     src/BlazorApps/BlazorApps.csproj \
     -c Release \
     -o publish
+
+./generate-sitemap.sh
