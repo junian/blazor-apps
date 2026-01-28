@@ -19,23 +19,37 @@
                 <FluentRadio Value="@("B")">B - {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}</FluentRadio>
                 <FluentRadio Value="@("P")">P - (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)</FluentRadio>
                 <FluentRadio Value="@("X")">X - {0x00000000,0x0000,0x0000,{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}}</FluentRadio>
-                <FluentRadio Value="@("Base64")">Base64</FluentRadio>
             </FluentRadioGroup>
 
             <FluentButton Appearance="Appearance.Accent" OnClick="GenerateGuids">Generate GUID</FluentButton>
         </FluentStack>
     </FluentCard>
 
-    @if (!string.IsNullOrEmpty(generatedGuids))
+    @if (guids.Any())
     {
-        <FluentTextArea Value="@generatedGuids" ReadOnly="true" Rows="@(Math.Min(count + 2, 20))" Style="width: 100%; font-family: monospace;" />
+        <FluentTextArea Value="@FormattedOutput" ReadOnly="true" Rows="@(Math.Min(count + 2, 20))" Style="width: 100%; font-family: monospace;" />
     }
 </FluentStack>
 
 @code {
     private int count = 1;
     private string format = "D";
-    private string generatedGuids = "";
+    private List<Guid> guids = new();
+
+    private string FormattedOutput
+    {
+        get
+        {
+            if (!guids.Any()) return string.Empty;
+
+            var sb = new StringBuilder();
+            foreach (var guid in guids)
+            {
+                sb.AppendLine(guid.ToString(format));
+            }
+            return sb.ToString();
+        }
+    }
 
     private void GenerateGuids()
     {
@@ -43,25 +57,10 @@
         if (count < 1) count = 1;
         if (count > 128) count = 128;
 
-        var sb = new StringBuilder();
-
+        guids.Clear();
         for (int i = 0; i < count; i++)
         {
-            var guid = Guid.NewGuid();
-            string result;
-
-            if (format == "Base64")
-            {
-                result = Convert.ToBase64String(guid.ToByteArray());
-            }
-            else
-            {
-                result = guid.ToString(format);
-            }
-
-            sb.AppendLine(result);
+            guids.Add(Guid.NewGuid());
         }
-
-        generatedGuids = sb.ToString();
     }
 }
