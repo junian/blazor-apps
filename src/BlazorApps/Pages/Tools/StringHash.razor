@@ -1,0 +1,83 @@
+@page "/tools/string-hash"
+@using System.Security.Cryptography
+@using System.Text
+@using BlazorApps.Services
+@inject IClipboardService ClipboardService
+
+<PageTitle>String Hash Generator</PageTitle>
+
+<h1>String Hash Generator</h1>
+
+<p>Generate cryptographic hash from a string.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Input Text</FluentLabel>
+            <FluentTextArea @bind-Value="inputText" Rows="5" Style="width: 100%; font-family: monospace;" Placeholder="Enter text to hash..." />
+
+            <FluentSelect Items="@algorithms"
+                          OptionText="@(i => i)"
+                          @bind-Value="@selectedAlgorithm"
+                          Label="Hash Algorithm"
+                          Style="min-width: 200px;" />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="GenerateHash">Generate Hash</FluentButton>
+                @if (!string.IsNullOrEmpty(outputHash))
+                {
+                    <FluentButton Appearance="Appearance.Neutral" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy Hash</FluentButton>
+                }
+            </FluentStack>
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputHash))
+    {
+        <FluentLabel>Output Hash</FluentLabel>
+        <FluentTextArea Value="@outputHash" ReadOnly="true" Rows="3" Style="width: 100%; font-family: monospace;" />
+    }
+</FluentStack>
+
+@code {
+    private string inputText = "";
+    private string outputHash = "";
+    private string selectedAlgorithm = "SHA-256";
+    
+    private List<string> algorithms = new() { "SHA-1", "SHA-256", "SHA-384", "SHA-512" };
+
+    private void GenerateHash()
+    {
+        if (string.IsNullOrEmpty(inputText))
+        {
+            outputHash = "";
+            return;
+        }
+
+        byte[] inputBytes = Encoding.UTF8.GetBytes(inputText);
+        byte[] hashBytes;
+
+        using (HashAlgorithm algorithm = selectedAlgorithm switch
+        {
+            "MD5" => MD5.Create(),
+            "SHA-1" => SHA1.Create(),
+            "SHA-256" => SHA256.Create(),
+            "SHA-384" => SHA384.Create(),
+            "SHA-512" => SHA512.Create(),
+            _ => throw new NotImplementedException()
+        })
+        {
+            hashBytes = algorithm.ComputeHash(inputBytes);
+        }
+
+        outputHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputHash))
+        {
+            await ClipboardService.WriteTextAsync(outputHash);
+        }
+    }
+}
