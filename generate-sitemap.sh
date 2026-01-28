@@ -49,7 +49,6 @@ find "$ROOT_DIR" -type f -name "index.html" \
     cat >> "$OUTPUT" <<EOF
   <url>
     <loc>$url</loc>
-    <lastmod>$lastmod</lastmod>
   </url>
 EOF
 done
