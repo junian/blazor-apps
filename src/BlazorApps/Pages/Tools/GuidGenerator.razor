@@ -1,6 +1,7 @@
 @page "/tools/guid"
 @using System.Text
-@inject IJSRuntime JSRuntime
+@using BlazorApps.Services
+@inject IClipboardService ClipboardService
 
 <PageTitle>GUID Generator</PageTitle>
 
@@ -92,7 +93,7 @@
     {
         if (!string.IsNullOrEmpty(FormattedOutput))
         {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", FormattedOutput);
+            await ClipboardService.WriteTextAsync(FormattedOutput);
             // Optional: Provide feedback to the user (e.g., toast notification) if desired, 
             // but requirements just asked for the button.
         }

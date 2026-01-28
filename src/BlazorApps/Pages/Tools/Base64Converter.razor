@@ -1,6 +1,7 @@
 @page "/tools/base64"
 @using System.Text
-@inject IJSRuntime JSRuntime
+@using BlazorApps.Services
+@inject IClipboardService ClipboardService
 
 <PageTitle>Base64 Encoder and Decoder</PageTitle>
 
@@ -84,7 +85,7 @@
     {
         if (!string.IsNullOrEmpty(outputText))
         {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", outputText);
+            await ClipboardService.WriteTextAsync(outputText);
         }
     }
 }
