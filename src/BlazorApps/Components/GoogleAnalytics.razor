@@ -14,6 +14,47 @@
 
     private MarkupString? _markup;
 
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrWhiteSpace(Id))
+        {
+            // Send initial page view
+            await TrackPageView();
+        }
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await TrackPageView();
+    }
+
+    private async Task TrackPageView()
+    {
+        var uri = Nav.ToBaseRelativePath(Nav.Uri);
+        if (string.IsNullOrEmpty(uri))
+            uri = "/";
+
+        await JS.InvokeVoidAsync(
+            "gtag",
+            "event",
+            "page_view",
+            new
+            {
+                page_path = "/" + uri
+            }
+        );
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+
     protected override void OnParametersSet()
     {
         if (string.IsNullOrWhiteSpace(Id))
