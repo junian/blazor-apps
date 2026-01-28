@@ -1,0 +1,90 @@
+@page "/tools/base64"
+@using System.Text
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Base64 Encoder and Decoder</PageTitle>
+
+<h1>Base64 Encoder and Decoder</h1>
+
+<p>Encode and decode text to/from Base64 string.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Input Text</FluentLabel>
+            <FluentTextArea @bind-Value="inputText" Rows="5" Style="width: 100%; font-family: monospace;" Placeholder="Enter text to encode or decode..." />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="Encode">Encode Base64</FluentButton>
+                <FluentButton Appearance="Appearance.Neutral" OnClick="Decode">Decode Base64</FluentButton>
+                @if (!string.IsNullOrEmpty(outputText))
+                {
+                    <FluentButton Appearance="Appearance.Outline" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy Output</FluentButton>
+                }
+            </FluentStack>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                 <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                     @errorMessage
+                 </FluentMessageBar>
+            }
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputText))
+    {
+        <FluentLabel>Output</FluentLabel>
+        <FluentTextArea Value="@outputText" ReadOnly="true" Rows="5" Style="width: 100%; font-family: monospace;" />
+    }
+</FluentStack>
+
+@code {
+    private string inputText = "";
+    private string outputText = "";
+    private string errorMessage = "";
+
+    private void Encode()
+    {
+        errorMessage = "";
+        if (string.IsNullOrEmpty(inputText)) return;
+
+        try
+        {
+            var bytes = Encoding.UTF8.GetBytes(inputText);
+            outputText = Convert.ToBase64String(bytes);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Encoding failed: {ex.Message}";
+        }
+    }
+
+    private void Decode()
+    {
+        errorMessage = "";
+        if (string.IsNullOrEmpty(inputText)) return;
+
+        try
+        {
+            var bytes = Convert.FromBase64String(inputText);
+            outputText = Encoding.UTF8.GetString(bytes);
+        }
+        catch (FormatException)
+        {
+            errorMessage = "Invalid Base64 input string.";
+        }
+        catch (Exception ex)
+        {
+             errorMessage = $"Decoding failed: {ex.Message}";
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputText))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", outputText);
+        }
+    }
+}
