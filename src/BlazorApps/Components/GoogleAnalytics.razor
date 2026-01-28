@@ -1,0 +1,38 @@
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@using Microsoft.AspNetCore.Components
+
+@if (_markup.HasValue)
+{
+    @_markup.Value
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = default!;
+
+    private MarkupString? _markup;
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(Id))
+        {
+            _markup = null;
+            return;
+        }
+
+        _markup = new MarkupString(
+            $$"""
+              <!-- Google tag (gtag.js) -->
+              <script async src="https://www.googletagmanager.com/gtag/js?id={{Id}}"></script>
+              <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+              
+                gtag('config', '{{Id}}');
+              </script>
+              """);
+    }
+}

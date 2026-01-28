@@ -1,8 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorApps.Components
+@inherits LayoutComponentBase
+@inject IConfiguration Config
+
+<GoogleAnalytics Id="@Config["GoogleAnalytics:Id"]" />
 
 <FluentLayout>
     <FluentHeader>
-        BlazorApps
+        @Config["Title"]
     </FluentHeader>
     <FluentStack Class="main" Orientation="Orientation.Horizontal" Width="100%">
         <NavMenu />
@@ -20,8 +24,8 @@
         </FluentBodyContent>
     </FluentStack>
     <FluentFooter>
-        <a href="https://www.fluentui-blazor.net" target="_blank">Documentation and demos</a>
+        Copyright &copy; 2024 - @DateTime.UtcNow.Year &nbsp;<a href="https://www.junian.dev/" target="_blank">junian.dev</a>
         <FluentSpacer />
-        <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor" target="_blank">About Blazor</a>
+        <a href="https://github.com/junian/blazor-apps" target="_blank">GitHub</a>
     </FluentFooter>
 </FluentLayout>
