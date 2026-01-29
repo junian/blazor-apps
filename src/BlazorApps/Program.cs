@@ -18,4 +18,5 @@ static void ConfigureServices(IServiceCollection services, string baseAddress)
     services.AddFluentUIComponents();
     services.AddScoped<IClipboardService, ClipboardService>();
     services.AddScoped<IHashService, HashService>();
+    services.AddScoped<IStaticAssetService, ServerStaticAssetService>();
 }
