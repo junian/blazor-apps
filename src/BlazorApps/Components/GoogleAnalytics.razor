@@ -35,6 +35,8 @@
 
     private async Task TrackPageView()
     {
+        return;
+        
         var uri = Nav.ToBaseRelativePath(Nav.Uri);
         if (string.IsNullOrEmpty(uri))
             uri = "/";
