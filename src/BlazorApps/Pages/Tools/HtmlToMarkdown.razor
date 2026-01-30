@@ -1,0 +1,233 @@
+@page "/tools/html-to-markdown/"
+@using BlazorApps.Services
+@using ReverseMarkdown
+@inject IClipboardService ClipboardService
+
+<PageTitle>HTML to Markdown Converter</PageTitle>
+
+<h1 id="html-to-markdown-converter">HTML to Markdown Converter</h1>
+
+<p>Convert HTML code to Markdown text.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Input HTML</FluentLabel>
+            
+            <FluentInputFile OnChanged="@LoadFile" Accept=".html,.txt">
+                 <ChildContent>
+                    <label for="file-input" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; cursor: pointer;">
+                        <FluentIcon Value="@(new Icons.Regular.Size24.ArrowUpload())" Color="Color.Fill" />
+                        <FluentLabel Class="margin-top: 8px;">Click to upload or drag a file here</FluentLabel>
+                    </label>
+                </ChildContent>
+            </FluentInputFile>
+            
+            <FluentTextArea @bind-Value="inputHtml" Rows="10" Style="width: 100%; font-family: monospace;" Placeholder="Enter HTML here or upload a file..." />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="ConvertHtml">Generate Markdown</FluentButton>
+                @if (!string.IsNullOrEmpty(outputMarkdown))
+                {
+                    <FluentButton Appearance="Appearance.Outline" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy Output</FluentButton>
+                }
+            </FluentStack>
+            
+             @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                 <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                     @errorMessage
+                 </FluentMessageBar>
+            }
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputMarkdown))
+    {
+        <FluentLabel>Output Markdown</FluentLabel>
+        <FluentTextArea Value="@outputMarkdown" ReadOnly="true" Rows="10" Style="width: 100%; font-family: monospace;" />
+    }
+</FluentStack>
+
+<hr />
+
+<!--content-start-->
+
+<h2 id="overview">Overview</h2>
+<p>The <strong>HTML to Markdown Converter</strong> is an online tool built with <strong>Blazor (C#)</strong> that converts HTML markup into clean, readable Markdown. It is ideal for developers, bloggers, and technical writers who want to migrate existing HTML content into Markdown for use in documentation, static site generators, or version-controlled content workflows.</p>
+<p>This tool is powered by the <strong>ReverseMarkdown</strong> NuGet package, a robust .NET library that translates HTML elements into their Markdown equivalents while preserving structure and readability.</p>
+<hr />
+<h2 id="what-the-tool-does">What the Tool Does</h2>
+<p>The HTML to Markdown Converter performs the following tasks:</p>
+<ul>
+<li>Accepts <strong><code>.html</code></strong>, <code>.txt</code>, or <code>.md</code> files containing HTML markup</li>
+<li>Allows users to <strong>paste or write raw HTML</strong> directly into a text area</li>
+<li>Converts HTML elements into Markdown syntax using <strong>ReverseMarkdown</strong></li>
+<li>Outputs the resulting <strong>Markdown text</strong> into a dedicated output area</li>
+</ul>
+<p>The generated Markdown can be used directly in Markdown editors, Git repositories, static site generators, or CMS platforms that support Markdown.</p>
+<hr />
+<h2 id="how-to-use-the-tool">How to Use the Tool</h2>
+<ol>
+<li><p><strong>Provide HTML Input</strong></p>
+<ul>
+<li>Upload a file containing HTML<br />
+<strong>or</strong></li>
+<li>Paste or type HTML into the input text area</li>
+</ul>
+</li>
+<li><p><strong>Generate Markdown</strong></p>
+<ul>
+<li>Click the <strong>Generate</strong> button</li>
+</ul>
+</li>
+<li><p><strong>Copy the Result</strong></p>
+<ul>
+<li>The converted Markdown will appear in the output text area</li>
+<li>Copy and reuse the Markdown anywhere you need it</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="key-terms-explained">Key Terms Explained</h2>
+<h3 id="html-hypertext-markup-language">HTML (HyperText Markup Language)</h3>
+<p>HTML is the standard markup language for structuring content on the web. While powerful, HTML can be verbose and less readable in raw form.</p>
+<p>Example:</p>
+<pre><code class="language-html">&lt;h1&gt;Hello World&lt;/h1&gt;
+&lt;p&gt;This is &lt;strong&gt;bold&lt;/strong&gt; text.&lt;/p&gt;
+</code></pre>
+<h3 id="markdown">Markdown</h3>
+<p>Markdown is a lightweight markup language that uses simple syntax for formatting text. It is easier to read and write compared to raw HTML.</p>
+<p>Equivalent Markdown:</p>
+<pre><code class="language-markdown"># Hello World
+This is **bold** text.
+</code></pre>
+<h3 id="reversemarkdown">ReverseMarkdown</h3>
+<p>ReverseMarkdown is a .NET library that converts HTML into Markdown. It supports:</p>
+<ul>
+<li>Headings, paragraphs, and lists</li>
+<li>Links and images</li>
+<li>Inline formatting (bold, italic, code)</li>
+<li>Customizable conversion rules</li>
+</ul>
+<hr />
+<h2 id="example-implementing-html-to-markdown-in-c">Example: Implementing HTML to Markdown in C#</h2>
+<p>Below is a simple example showing how you can convert HTML to Markdown in your own C# application using <strong>ReverseMarkdown</strong>.</p>
+<h3 id="install-the-reversemarkdown-nuget-package">1. Install the ReverseMarkdown NuGet Package</h3>
+<pre><code class="language-bash">dotnet add package ReverseMarkdown
+</code></pre>
+<h3 id="create-a-conversion-function">2. Create a Conversion Function</h3>
+<pre><code class="language-csharp">using ReverseMarkdown;
+
+public static class HtmlToMarkdownConverter
+{
+    public static string ConvertToMarkdown(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+            return string.Empty;
+
+        var converter = new Converter(new Config
+        {
+            GithubFlavored = true,
+            RemoveComments = true,
+            SmartHrefHandling = true
+        });
+
+        return converter.Convert(html);
+    }
+}
+</code></pre>
+<h3 id="usage-example">3. Usage Example</h3>
+<pre><code class="language-csharp">string htmlContent = @@&quot;
+&lt;h1&gt;HTML to Markdown&lt;/h1&gt;
+&lt;p&gt;This is &lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt; text.&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li&gt;Item One&lt;/li&gt;
+    &lt;li&gt;Item Two&lt;/li&gt;
+&lt;/ul&gt;
+&quot;;
+
+string markdown = HtmlToMarkdownConverter.ConvertToMarkdown(htmlContent);
+
+// markdown now contains the converted Markdown text
+</code></pre>
+<hr />
+<h2 id="why-use-reversemarkdown">Why Use ReverseMarkdown?</h2>
+<ul>
+<li>Designed specifically for <strong>HTML-to-Markdown</strong> conversion</li>
+<li>Produces <strong>clean and readable</strong> Markdown output</li>
+<li>Supports GitHub-Flavored Markdown</li>
+<li>Easy to configure and integrate into Blazor and .NET applications</li>
+</ul>
+<hr />
+<h2 id="common-use-cases">Common Use Cases</h2>
+<ul>
+<li>Migrating legacy HTML content to Markdown</li>
+<li>Converting CMS-generated HTML into Markdown files</li>
+<li>Preparing content for static site generators</li>
+<li>Cleaning up copied HTML from rich-text editors</li>
+<li>Automating documentation transformations</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The <strong>HTML to Markdown Converter</strong> offers a fast and reliable way to transform HTML into Markdown using modern .NET tooling. Whether you use the online Blazor-based tool or implement the logic yourself with ReverseMarkdown, it provides an efficient solution for content migration and Markdown-based workflows.</p>
+
+<!--content-end-->
+
+<hr />
+
+@code {
+    private string inputHtml = "";
+    private string outputMarkdown = "";
+    private string errorMessage = "";
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        errorMessage = "";
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                 // Limit to 1MB to prevent issues
+                if (file.Size > 1024 * 1024) 
+                {
+                    errorMessage = "File size exceeds 1MB limit.";
+                    return;
+                }
+
+                using var stream = file.OpenReadStream(1024 * 1024);
+                using var reader = new StreamReader(stream);
+                inputHtml = await reader.ReadToEndAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error reading file: {ex.Message}";
+        }
+    }
+
+    private void ConvertHtml()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(inputHtml)) return;
+
+        try 
+        {
+            var converter = new ReverseMarkdown.Converter();
+            outputMarkdown = converter.Convert(inputHtml);
+        }
+        catch (Exception ex)
+        {
+             errorMessage = $"Conversion failed: {ex.Message}";
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputMarkdown))
+        {
+            await ClipboardService.WriteTextAsync(outputMarkdown);
+        }
+    }
+}

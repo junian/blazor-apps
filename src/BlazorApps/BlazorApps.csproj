@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.13.2" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.13.2" />
     <PackageReference Include="PublishSPAforGitHubPages.Build" Version="3.0.3" />
+    <PackageReference Include="ReverseMarkdown" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
