@@ -5,7 +5,7 @@
 
 <PageTitle>Base64 Encoder and Decoder</PageTitle>
 
-<h1>Base64 Encoder and Decoder</h1>
+<h1 id="base64-encoder-and-decoder">Base64 Encoder and Decoder</h1>
 
 <p>Encode and decode text to/from Base64 string.</p>
 
@@ -40,6 +40,149 @@
     }
 </FluentStack>
 
+<hr />
+
+<!--content start-->
+
+<h2 id="overview">Overview</h2>
+<p>The <strong>Base64 Encoder and Decoder</strong> is a simple online utility built with <strong>Blazor (C#)</strong> that allows users to convert plain text into Base64-encoded strings and decode Base64 strings back into their original text.</p>
+<p>This tool is especially useful for developers working with APIs, authentication headers, configuration files, or data transmission where binary or special characters must be safely represented as text.</p>
+<hr />
+<h2 id="what-the-tool-does">What the Tool Does</h2>
+<p>The Base64 Encoder and Decoder provides two core functions:</p>
+<ul>
+<li><p><strong>Encode to Base64</strong></p>
+<ul>
+<li>Converts plain text into a Base64-encoded string</li>
+</ul>
+</li>
+<li><p><strong>Decode from Base64</strong></p>
+<ul>
+<li>Converts a Base64 string back into its original text</li>
+<li>Displays an error if the input is <strong>not valid Base64</strong></li>
+</ul>
+</li>
+</ul>
+<p>The tool validates input during decoding to ensure correctness and prevent misleading output.</p>
+<hr />
+<h2 id="how-to-use-the-tool">How to Use the Tool</h2>
+<ol>
+<li><p><strong>Enter Text</strong></p>
+<ul>
+<li>Type or paste text into the input field</li>
+</ul>
+</li>
+<li><p><strong>Choose an Action</strong></p>
+<ul>
+<li>Click <strong>Encode Base64</strong> to encode the text</li>
+<li>Click <strong>Decode Base64</strong> to decode a Base64 string</li>
+</ul>
+</li>
+<li><p><strong>View the Result</strong></p>
+<ul>
+<li>The result will appear in the output area</li>
+<li>If decoding fails, an error message will be shown</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="key-terms-explained">Key Terms Explained</h2>
+<h3 id="base64-encoding">Base64 Encoding</h3>
+<p>Base64 is a binary-to-text encoding scheme that represents data using 64 ASCII characters (<code>A–Z</code>, <code>a–z</code>, <code>0–9</code>, <code>+</code>, <code>/</code>). It is commonly used to safely transmit data over text-based systems such as HTTP headers and JSON.</p>
+<p>Example:</p>
+<pre><code class="language-text">Hello World
+</code></pre>
+<p>Encoded as:</p>
+<pre><code class="language-text">SGVsbG8gV29ybGQ=
+</code></pre>
+<h3 id="encoding-vs-decoding">Encoding vs Decoding</h3>
+<ul>
+<li><strong>Encoding</strong> transforms readable text into a Base64 string</li>
+<li><strong>Decoding</strong> reverses the process back into readable text</li>
+</ul>
+<h3 id="invalid-base64">Invalid Base64</h3>
+<p>A Base64 string is considered invalid if:</p>
+<ul>
+<li>It contains unsupported characters</li>
+<li>Its length is incorrect</li>
+<li>Padding (<code>=</code>) is malformed</li>
+</ul>
+<p>When invalid input is detected, the decoder will return an error instead of corrupted output.</p>
+<hr />
+<h2 id="example-implementing-base64-encode-decode-in-c">Example: Implementing Base64 Encode &amp; Decode in C#</h2>
+<p>Below is a simple C# implementation showing how to encode and decode Base64 safely.</p>
+<h3 id="base64-utility-functions">1. Base64 Utility Functions</h3>
+<pre><code class="language-csharp">using System;
+using System.Text;
+
+public static class Base64Helper
+{
+    public static string Encode(string plainText)
+    {
+        if (string.IsNullOrEmpty(plainText))
+            return string.Empty;
+
+        var bytes = Encoding.UTF8.GetBytes(plainText);
+        return Convert.ToBase64String(bytes);
+    }
+
+    public static string Decode(string base64Text)
+    {
+        if (string.IsNullOrEmpty(base64Text))
+            return string.Empty;
+
+        try
+        {
+            var bytes = Convert.FromBase64String(base64Text);
+            return Encoding.UTF8.GetString(bytes);
+        }
+        catch (FormatException)
+        {
+            throw new ArgumentException(&quot;Invalid Base64 input.&quot;);
+        }
+    }
+}
+</code></pre>
+<hr />
+<h3 id="usage-example">2. Usage Example</h3>
+<pre><code class="language-csharp">string text = &quot;Base64 is useful&quot;;
+
+// Encode
+string encoded = Base64Helper.Encode(text);
+
+// Decode
+string decoded = Base64Helper.Decode(encoded);
+</code></pre>
+<p><strong>Encoded Output:</strong></p>
+<pre><code class="language-text">QmFzZTY0IGlzIHVzZWZ1bA==
+</code></pre>
+<p><strong>Decoded Output:</strong></p>
+<pre><code class="language-text">Base64 is useful
+</code></pre>
+<hr />
+<h2 id="why-use-base64">Why Use Base64?</h2>
+<ul>
+<li>Safely transmits binary data as text</li>
+<li>Prevents encoding issues in HTTP, JSON, and XML</li>
+<li>Widely supported across platforms and languages</li>
+<li>Essential for authentication headers and tokens</li>
+</ul>
+<hr />
+<h2 id="common-use-cases">Common Use Cases</h2>
+<ul>
+<li>Encoding API credentials</li>
+<li>Embedding binary data in JSON</li>
+<li>Working with JWTs and tokens</li>
+<li>Safely storing configuration values</li>
+<li>Transmitting data via HTTP headers</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The <strong>Base64 Encoder and Decoder</strong> offers a fast and reliable way to convert text to and from Base64, with built-in validation to prevent decoding errors. Whether you use the online Blazor tool or implement the logic yourself in C#, it’s an essential utility for everyday development and data handling tasks.</p>
+
+<!--content end-->
+
+<hr />
 @code {
     private string inputText = "";
     private string outputText = "";

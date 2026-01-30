@@ -5,7 +5,7 @@
 
 <PageTitle>GUID Generator</PageTitle>
 
-<h1>GUID Generator</h1>
+<h1 id="guid-generator">GUID Generator</h1>
 
 <p>Generate unique identifiers (GUIDs) in various formats.</p>
 
@@ -45,6 +45,156 @@
         <FluentTextArea Value="@FormattedOutput" ReadOnly="true" Rows="@(Math.Min(count + 2, 20))" Style="width: 100%; font-family: monospace;" />
     }
 </FluentStack>
+
+<hr />
+<!--content start-->
+
+<h2 id="overview">Overview</h2>
+<p>The <strong>GUID Generator</strong> is a lightweight online tool built with <strong>Blazor (C#)</strong> that allows users to generate one or multiple GUIDs (Globally Unique Identifiers) instantly. It is designed for developers who need quick, correctly formatted identifiers for databases, APIs, configuration files, or application development.</p>
+<p>The tool supports <strong>custom quantity</strong>, <strong>letter casing</strong>, and <strong>multiple output formats</strong>, making it flexible for different technical requirements.</p>
+<hr />
+<h2 id="what-the-tool-does">What the Tool Does</h2>
+<p>The GUID Generator enables users to:</p>
+<ul>
+<li>Generate <strong>one or many GUIDs at once</strong></li>
+<li>Choose between <strong>lowercase</strong> or <strong>uppercase</strong> output</li>
+<li>Select from multiple <strong>GUID formats</strong></li>
+<li>Instantly copy the generated GUIDs for use in code or configuration</li>
+</ul>
+<p>All GUIDs are generated using the standard .NET GUID generation mechanism, ensuring uniqueness and reliability.</p>
+<hr />
+<h2 id="how-to-use-the-tool">How to Use the Tool</h2>
+<ol>
+<li><p><strong>Enter the Number of GUIDs</strong></p>
+<ul>
+<li>Specify how many GUIDs you want to generate (e.g. <code>1</code>, <code>10</code>, <code>100</code>)</li>
+</ul>
+</li>
+<li><p><strong>Select Letter Casing</strong></p>
+<ul>
+<li>Choose <strong>Lowercase</strong> or <strong>Uppercase</strong></li>
+</ul>
+</li>
+<li><p><strong>Choose Output Format</strong></p>
+<ul>
+<li>Pick the desired GUID format (see formats below)</li>
+</ul>
+</li>
+<li><p><strong>Generate</strong></p>
+<ul>
+<li>Click the <strong>Generate</strong> button</li>
+<li>The GUIDs will appear in the output area, ready to copy</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="guid-formats-explained">GUID Formats Explained</h2>
+<p>A GUID (Globally Unique Identifier) is a 128-bit value typically displayed as a hexadecimal string.</p>
+<h3 id="common-guid-formats-in.net">Common GUID Formats in .NET</h3>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D</code></td>
+<td><code>6f9619ff-8b86-d011-b42d-00cf4fc964ff</code></td>
+<td>Default format with hyphens</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td><code>6f9619ff8b86d011b42d00cf4fc964ff</code></td>
+<td>Digits only, no separators</td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td><code>{6f9619ff-8b86-d011-b42d-00cf4fc964ff}</code></td>
+<td>Enclosed in braces</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td><code>(6f9619ff-8b86-d011-b42d-00cf4fc964ff)</code></td>
+<td>Enclosed in parentheses</td>
+</tr>
+<tr>
+<td><code>X</code></td>
+<td><code>{0x6f9619ff,0x8b86,0xd011,{0xb4,0x2d,0x00,0xcf,0x4f,0xc9,0x64,0xff}}</code></td>
+<td>Hexadecimal format (C-style)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="example-generating-guids-in-c">Example: Generating GUIDs in C#</h2>
+<p>Below is an example showing how to implement your own GUID generator in C# with support for <strong>count</strong>, <strong>format</strong>, and <strong>letter casing</strong>.</p>
+<h3 id="guid-generation-function">1. GUID Generation Function</h3>
+<pre><code class="language-csharp">using System;
+using System.Collections.Generic;
+
+public static class GuidGenerator
+{
+    public static IEnumerable&lt;string&gt; Generate(
+        int count,
+        string format = &quot;D&quot;,
+        bool uppercase = false)
+    {
+        if (count &lt;= 0)
+            yield break;
+
+        for (int i = 0; i &lt; count; i++)
+        {
+            var guid = Guid.NewGuid().ToString(format);
+            yield return uppercase
+                ? guid.ToUpperInvariant()
+                : guid.ToLowerInvariant();
+        }
+    }
+}
+</code></pre>
+<h3 id="usage-example">2. Usage Example</h3>
+<pre><code class="language-csharp">var guids = GuidGenerator.Generate(
+    count: 5,
+    format: &quot;N&quot;,
+    uppercase: true
+);
+
+foreach (var guid in guids)
+{
+    Console.WriteLine(guid);
+}
+</code></pre>
+<p><strong>Output example:</strong></p>
+<pre><code>E2C56DB5DFFB48D2B060D0F5A71096E0
+A4F1E1C0E9C746D2A3C9A7E3A8F7D512
+...
+</code></pre>
+<hr />
+<h2 id="why-use-a-guid-generator">Why Use a GUID Generator?</h2>
+<ul>
+<li>Guarantees <strong>global uniqueness</strong></li>
+<li>Prevents key collisions in distributed systems</li>
+<li>Ideal for <strong>database primary keys</strong></li>
+<li>Commonly used in APIs, microservices, and cloud applications</li>
+<li>Fully supported and optimized in .NET</li>
+</ul>
+<hr />
+<h2 id="common-use-cases">Common Use Cases</h2>
+<ul>
+<li>Database identifiers</li>
+<li>API keys and request IDs</li>
+<li>Correlation IDs for logging</li>
+<li>Configuration and environment values</li>
+<li>Test data generation</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The <strong>GUID Generator</strong> provides a fast, flexible, and developer-friendly way to generate unique identifiers with precise control over format and casing. Whether you use the online Blazor tool or implement the logic yourself in C#, it’s a reliable solution for everyday development needs.</p>
+
+<!--content end-->
+<hr />
 
 @code {
     private int count = 1;
