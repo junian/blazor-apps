@@ -1,0 +1,237 @@
+@page "/tools/markdown-to-html/"
+@using BlazorApps.Services
+@using Markdig
+@inject IClipboardService ClipboardService
+
+<PageTitle>Markdown to HTML Converter</PageTitle>
+
+<h1 id="markdown-to-html-converter">Markdown to HTML Converter</h1>
+
+<p>Convert Markdown text to HTML.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Input Markdown</FluentLabel>
+            
+            <FluentInputFile OnChanged="@LoadFile" Accept=".md,.txt">
+                <ChildContent>
+                    <label for="file-input" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; cursor: pointer;">
+                        <FluentIcon Value="@(new Icons.Regular.Size24.ArrowUpload())" Color="Color.Fill" />
+                        <FluentLabel Class="margin-top: 8px;">Click to upload or drag a file here</FluentLabel>
+                    </label>
+                </ChildContent>
+            </FluentInputFile>
+            
+            <FluentTextArea @bind-Value="inputMarkdown" Rows="10" Style="width: 100%; font-family: monospace;" Placeholder="Enter markdown here or upload a file..." />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="ConvertMarkdown">Generate HTML</FluentButton>
+                @if (!string.IsNullOrEmpty(outputHtml))
+                {
+                    <FluentButton Appearance="Appearance.Outline" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy Output</FluentButton>
+                }
+            </FluentStack>
+            
+             @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                 <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                     @errorMessage
+                 </FluentMessageBar>
+            }
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputHtml))
+    {
+        <FluentTabs ActiveTabId="tab-html" Style="width: 100%">
+            <FluentTab Label="HTML Code" Id="tab-html">
+                <FluentTextArea Value="@outputHtml" ReadOnly="true" Rows="10" Style="width: 100%; font-family: monospace;" />
+            </FluentTab>
+            <FluentTab Label="Preview" Id="tab-preview">
+                <div style="padding: 1rem; border: 1px solid var(--neutral-stroke-rest); border-radius: 4px; margin-top: 10px;">
+                    @((MarkupString)outputHtml)
+                </div>
+            </FluentTab>
+        </FluentTabs>
+    }
+</FluentStack>
+
+<hr />
+
+<!--content-->
+
+<h2 id="overview">Overview</h2>
+<p>The <strong>Markdown to HTML Converter</strong> is an online utility built with <strong>Blazor (C#)</strong> that transforms Markdown content into clean, standards-compliant HTML. It is designed for developers, technical writers, and content creators who want a fast and reliable way to preview or generate HTML output from Markdown syntax.</p>
+<p>Under the hood, this tool uses the popular <strong>Markdig</strong> NuGet package, a high-performance Markdown processor for .NET that fully complies with the CommonMark specification and supports advanced extensions.</p>
+<hr />
+<h2 id="what-the-tool-does">What the Tool Does</h2>
+<p>This tool converts Markdown text into HTML by:</p>
+<ul>
+<li>Accepting <strong><code>.md</code></strong> or <strong><code>.txt</code></strong> file uploads</li>
+<li>Allowing users to <strong>write or paste Markdown directly</strong> into a text area</li>
+<li>Parsing the Markdown syntax using <strong>Markdig</strong></li>
+<li>Outputting the generated <strong>HTML markup</strong> into a dedicated output field</li>
+</ul>
+<p>The resulting HTML can be copied and used directly in websites, CMS platforms, static site generators, or Blazor components.</p>
+<hr />
+<h2 id="how-to-use-the-tool">How to Use the Tool</h2>
+<ol>
+<li><p><strong>Provide Markdown Input</strong></p>
+<ul>
+<li>Upload a <code>.md</code> or <code>.txt</code> file<br />
+<strong>or</strong></li>
+<li>Paste or type Markdown content into the input text area</li>
+</ul>
+</li>
+<li><p><strong>Generate HTML</strong></p>
+<ul>
+<li>Click the <strong>Generate</strong> button</li>
+</ul>
+</li>
+<li><p><strong>Copy the Output</strong></p>
+<ul>
+<li>The converted HTML will appear in the output text area</li>
+<li>Copy and use it anywhere HTML is supported</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="key-terms-explained">Key Terms Explained</h2>
+<h3 id="markdown">Markdown</h3>
+<p>Markdown is a lightweight markup language used to format text using plain characters. It is commonly used for documentation, README files, blogs, and static websites.</p>
+<p>Example:</p>
+<pre><code class="language-markdown">## Hello World
+This is **bold** and this is *italic*.
+</code></pre>
+<h3 id="html-hypertext-markup-language">HTML (HyperText Markup Language)</h3>
+<p>HTML is the standard markup language for creating web pages. Markdown is often converted into HTML before being rendered in a browser.</p>
+<h3 id="markdig">Markdig</h3>
+<p>Markdig is a fast, extensible Markdown processor for .NET. It supports:</p>
+<ul>
+<li>CommonMark compliance</li>
+<li>GitHub-Flavored Markdown (GFM)</li>
+<li>Tables, footnotes, task lists</li>
+<li>Custom extensions</li>
+</ul>
+<hr />
+<h2 id="example-implementing-markdown-to-html-in-c">Example: Implementing Markdown to HTML in C#</h2>
+<p>Below is a simple example showing how you can implement your own Markdown-to-HTML converter using <strong>Markdig</strong> in a C# application.</p>
+<h3 id="install-the-markdig-nuget-package">1. Install the Markdig NuGet Package</h3>
+<pre><code class="language-bash">dotnet add package Markdig
+</code></pre>
+<h3 id="create-a-markdown-conversion-function">2. Create a Markdown Conversion Function</h3>
+<pre><code class="language-csharp">using Markdig;
+
+public static class MarkdownConverter
+{
+    public static string ConvertToHtml(string markdown)
+    {
+        if (string.IsNullOrWhiteSpace(markdown))
+            return string.Empty;
+
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .Build();
+
+        return Markdown.ToHtml(markdown, pipeline);
+    }
+}
+</code></pre>
+<h3 id="usage-example">3. Usage Example</h3>
+<pre><code class="language-csharp">string markdownText = @@&quot;
+# Markdown to HTML
+
+This is **bold**, this is *italic*, and this is a list:
+
+- Item 1
+- Item 2
+- Item 3
+&quot;;
+
+string html = MarkdownConverter.ConvertToHtml(markdownText);
+
+// html now contains valid HTML output
+</code></pre>
+<hr />
+<h2 id="why-use-markdig">Why Use Markdig?</h2>
+<ul>
+<li><strong>Fast and efficient</strong> for large documents</li>
+<li><strong>Highly extensible</strong> with plugin support</li>
+<li><strong>Production-ready</strong> and widely used in .NET projects</li>
+<li>Ideal for <strong>Blazor</strong>, ASP.NET, and console applications</li>
+</ul>
+<hr />
+<h2 id="use-cases">Use Cases</h2>
+<ul>
+<li>Preview Markdown content before publishing</li>
+<li>Convert documentation into HTML</li>
+<li>Generate static site content</li>
+<li>Render Markdown dynamically in Blazor applications</li>
+<li>Build custom CMS or blogging platforms</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The <strong>Markdown to HTML Converter</strong> provides a simple yet powerful way to transform Markdown into HTML using modern .NET tooling. Whether you use the online tool or implement the logic yourself with Markdig, it offers a reliable foundation for Markdown processing in any C# or Blazor project.</p>
+
+<!--content-->
+
+<hr />
+
+@code {
+    private string inputMarkdown = "";
+    private string outputHtml = "";
+    private string errorMessage = "";
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        errorMessage = "";
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                // Limit to 1MB to prevent issues
+                if (file.Size > 1024 * 1024) 
+                {
+                    errorMessage = "File size exceeds 1MB limit.";
+                    return;
+                }
+
+                using var stream = file.OpenReadStream(1024 * 1024);
+                using var reader = new StreamReader(stream);
+                inputMarkdown = await reader.ReadToEndAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error reading file: {ex.Message}";
+        }
+    }
+
+    private void ConvertMarkdown()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(inputMarkdown)) return;
+
+        try 
+        {
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .Build();
+            outputHtml = Markdown.ToHtml(inputMarkdown, pipeline);
+        }
+        catch (Exception ex)
+        {
+             errorMessage = $"Conversion failed: {ex.Message}";
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputHtml))
+        {
+            await ClipboardService.WriteTextAsync(outputHtml);
+        }
+    }
+}
