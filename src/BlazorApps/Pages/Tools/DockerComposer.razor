@@ -1,0 +1,453 @@
+@page "/tools/docker-composer/"
+@using System.Text
+@using System.Text.RegularExpressions
+@using BlazorApps.Services
+@inject IClipboardService ClipboardService
+
+<PageTitle>Docker Run to Docker Compose Converter</PageTitle>
+
+<h1 id="docker-run-to-docker-compose-converter">Docker Run to Docker Compose Converter</h1>
+
+<p>Convert <code>docker run</code> commands into <code>docker-compose.yaml</code> format.</p>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+            <FluentLabel>Docker Run Command</FluentLabel>
+            <FluentTextArea @bind-Value="inputText" Rows="5" Style="width: 100%; font-family: monospace;" Placeholder="Example: docker run -d --name my-redis -p 6379:6379 redis:alpine" />
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10">
+                <FluentButton Appearance="Appearance.Accent" OnClick="ConvertCommand">Convert to Compose</FluentButton>
+                @if (!string.IsNullOrEmpty(outputText))
+                {
+                    <FluentButton Appearance="Appearance.Outline" OnClick="CopyToClipboard" IconStart="@(new Icons.Regular.Size16.Copy())">Copy Output</FluentButton>
+                }
+            </FluentStack>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                 <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                     @errorMessage
+                 </FluentMessageBar>
+            }
+        </FluentStack>
+    </FluentCard>
+
+    @if (!string.IsNullOrEmpty(outputText))
+    {
+        <FluentLabel>docker-compose.yaml</FluentLabel>
+        <FluentTextArea Value="@outputText" ReadOnly="true" Rows="15" Style="width: 100%; font-family: monospace;" />
+    }
+</FluentStack>
+
+<hr />
+
+<h2 id="overview">Overview</h2>
+<p>The <strong>Docker Run to Docker Compose</strong> tool is an online utility built with <strong>Blazor (C#)</strong> that converts a <code>docker run</code> command into an equivalent <strong>Docker Compose YAML</strong> configuration.</p>
+<p>This tool is designed for developers and DevOps engineers who want to migrate from one-off <code>docker run</code> commands to a more maintainable, version-controlled, and reusable <code>docker-compose.yml</code> setup.</p>
+<hr />
+<h2 id="what-the-tool-does">What the Tool Does</h2>
+<p>This tool analyzes a <code>docker run</code> command and translates it into a Docker Compose service definition by:</p>
+<ul>
+<li>Parsing common <code>docker run</code> flags and arguments</li>
+<li>Mapping them to their corresponding <strong>Docker Compose</strong> keys</li>
+<li>Generating a valid <strong>YAML</strong> configuration</li>
+<li>Making container setups easier to maintain and share</li>
+</ul>
+<p>The output can be used directly as a <code>docker-compose.yml</code> file or as part of a larger Compose configuration.</p>
+<hr />
+<h2 id="how-to-use-the-tool">How to Use the Tool</h2>
+<ol>
+<li><p><strong>Enter a <code>docker run</code> Command</strong></p>
+<ul>
+<li>Paste a full <code>docker run</code> command into the input field</li>
+</ul>
+</li>
+<li><p><strong>Generate Docker Compose</strong></p>
+<ul>
+<li>Click the <strong>Generate</strong> button</li>
+</ul>
+</li>
+<li><p><strong>Copy the Output</strong></p>
+<ul>
+<li>The equivalent Docker Compose configuration will appear in YAML format</li>
+<li>Copy and save it as <code>docker-compose.yml</code></li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="key-terms-explained">Key Terms Explained</h2>
+<h3 id="docker-run">docker run</h3>
+<p><code>docker run</code> is a command used to start a container from an image with specific runtime options such as ports, volumes, environment variables, and restart policies.</p>
+<p>Example:</p>
+<pre><code class="language-bash">docker run -d \
+  --name web \
+  -p 8080:80 \
+  -v ./data:/var/www/html \
+  -e APP_ENV=production \
+  nginx
+</code></pre>
+<h3 id="docker-compose">Docker Compose</h3>
+<p>Docker Compose is a tool for defining and running multi-container Docker applications using a YAML file. It simplifies container configuration and orchestration.</p>
+<h3 id="docker-compose.yml">docker-compose.yml</h3>
+<p>A YAML file that defines services, networks, and volumes for Docker containers.</p>
+<hr />
+<h2 id="example-conversion">Example Conversion</h2>
+<h3 id="input-docker-run-command">Input: <code>docker run</code> Command</h3>
+<pre><code class="language-bash">docker run -d \
+  --name myapp \
+  -p 3000:3000 \
+  -v ./app:/app \
+  -e NODE_ENV=production \
+  --restart unless-stopped \
+  node:18
+</code></pre>
+<h3 id="output-docker-compose-yaml">Output: Docker Compose (YAML)</h3>
+<pre><code class="language-yaml">version: &quot;3.9&quot;
+
+services:
+  myapp:
+    image: node:18
+    container_name: myapp
+    ports:
+      - &quot;3000:3000&quot;
+    volumes:
+      - ./app:/app
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+</code></pre>
+<hr />
+<h2 id="common-flag-mapping">Common Flag Mapping</h2>
+<table>
+<thead>
+<tr>
+<th>docker run Flag</th>
+<th>Docker Compose Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--name</code></td>
+<td><code>container_name</code></td>
+</tr>
+<tr>
+<td><code>-p</code>, <code>--publish</code></td>
+<td><code>ports</code></td>
+</tr>
+<tr>
+<td><code>-v</code>, <code>--volume</code></td>
+<td><code>volumes</code></td>
+</tr>
+<tr>
+<td><code>-e</code>, <code>--env</code></td>
+<td><code>environment</code></td>
+</tr>
+<tr>
+<td><code>--restart</code></td>
+<td><code>restart</code></td>
+</tr>
+<tr>
+<td><code>-d</code></td>
+<td>(implicit in <code>docker compose up -d</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="example-implementing-the-conversion-logic-in-c">Example: Implementing the Conversion Logic in C#</h2>
+<p>Below is a simplified example showing how you might parse a <code>docker run</code> command and generate a Docker Compose YAML structure in C#.</p>
+<h3 id="conversion-function">1. Conversion Function</h3>
+<pre><code class="language-csharp">using System.Text;
+
+public static class DockerRunConverter
+{
+    public static string ConvertToCompose(
+        string image,
+        string serviceName,
+        string port,
+        string volume,
+        string envKey,
+        string envValue,
+        string restartPolicy)
+    {
+        var yaml = new StringBuilder();
+
+        yaml.AppendLine(&quot;version: \&quot;3.9\&quot;&quot;);
+        yaml.AppendLine();
+        yaml.AppendLine(&quot;services:&quot;);
+        yaml.AppendLine($&quot;  {serviceName}:&quot;);
+        yaml.AppendLine($&quot;    image: {image}&quot;);
+        yaml.AppendLine($&quot;    container_name: {serviceName}&quot;);
+
+        if (!string.IsNullOrEmpty(port))
+        {
+            yaml.AppendLine(&quot;    ports:&quot;);
+            yaml.AppendLine($&quot;      - \&quot;{port}\&quot;&quot;);
+        }
+
+        if (!string.IsNullOrEmpty(volume))
+        {
+            yaml.AppendLine(&quot;    volumes:&quot;);
+            yaml.AppendLine($&quot;      - {volume}&quot;);
+        }
+
+        if (!string.IsNullOrEmpty(envKey))
+        {
+            yaml.AppendLine(&quot;    environment:&quot;);
+            yaml.AppendLine($&quot;      {envKey}: {envValue}&quot;);
+        }
+
+        if (!string.IsNullOrEmpty(restartPolicy))
+        {
+            yaml.AppendLine($&quot;    restart: {restartPolicy}&quot;);
+        }
+
+        return yaml.ToString();
+    }
+}
+</code></pre>
+<hr />
+<h3 id="usage-example">2. Usage Example</h3>
+<pre><code class="language-csharp">string yaml = DockerRunConverter.ConvertToCompose(
+    image: &quot;nginx&quot;,
+    serviceName: &quot;web&quot;,
+    port: &quot;8080:80&quot;,
+    volume: &quot;./html:/usr/share/nginx/html&quot;,
+    envKey: &quot;APP_ENV&quot;,
+    envValue: &quot;production&quot;,
+    restartPolicy: &quot;always&quot;
+);
+</code></pre>
+<hr />
+<h2 id="why-convert-to-docker-compose">Why Convert to Docker Compose?</h2>
+<ul>
+<li>Easier to <strong>maintain and version control</strong></li>
+<li>Better suited for <strong>multi-container setups</strong></li>
+<li>Cleaner configuration compared to long CLI commands</li>
+<li>Ideal for CI/CD pipelines and team collaboration</li>
+</ul>
+<hr />
+<h2 id="common-use-cases">Common Use Cases</h2>
+<ul>
+<li>Migrating existing Docker commands to Compose</li>
+<li>Sharing container setups with teammates</li>
+<li>Creating reproducible development environments</li>
+<li>Preparing services for orchestration</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The <strong>Docker Run to Docker Compose</strong> tool simplifies the transition from ad-hoc container commands to structured, reusable Docker Compose configurations. Whether you use the online Blazor-based tool or implement the conversion logic yourself in C#, it helps improve maintainability and clarity in containerized workflows.</p>
+
+<hr />
+
+@code {
+    private string inputText = "";
+    private string outputText = "";
+    private string errorMessage = "";
+
+    private void ConvertCommand()
+    {
+        errorMessage = "";
+        outputText = "";
+
+        if (string.IsNullOrWhiteSpace(inputText)) return;
+
+        try
+        {
+            outputText = ParseDockerRun(inputText);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Conversion failed: {ex.Message}";
+        }
+    }
+
+    private string ParseDockerRun(string command)
+    {
+        // Pre-process: Handle line continuations (backslash + newline) and replace with space
+        command = Regex.Replace(command, @"\\\s*[\r\n]+", " ");
+
+        // Basic cleanup
+        command = command.Trim();
+        if (!command.StartsWith("docker run"))
+        {
+            throw new ArgumentException("Command must start with 'docker run'.");
+        }
+
+        // Tokenize (simple space splitting, respecting quotes)
+        // Split by whitespace unless inside quotes
+        var args = Regex.Matches(command, @"[\""].+?[\""]|[^\s]+")
+            .Cast<Match>()
+            .Select(m => m.Value)
+            .ToList();
+
+        // Skip "docker" and "run"
+        int startIndex = 0;
+        if (args.Count > 0 && args[0] == "docker") startIndex++;
+        if (args.Count > startIndex && args[startIndex] == "run") startIndex++;
+
+        string imageName = "";
+        string containerName = "app"; // default
+        List<string> ports = new List<string>();
+        List<string> volumes = new List<string>();
+        List<string> envVars = new List<string>();
+        string restartPolicy = "";
+        string network = "";
+        List<string> cmdArgs = new List<string>();
+
+        bool imageFound = false;
+
+        string StripQuotes(string input)
+        {
+            if (input.StartsWith("\"") && input.EndsWith("\"") && input.Length >= 2)
+            {
+                return input.Substring(1, input.Length - 2);
+            }
+            return input;
+        }
+
+        for (int i = startIndex; i < args.Count; i++)
+        {
+            string arg = args[i];
+
+            if (imageFound)
+            {
+                // After image, everything else is command
+                cmdArgs.Add(StripQuotes(arg));
+                continue;
+            }
+
+            if (arg.StartsWith("-"))
+            {
+                // Handle flags
+                switch (arg)
+                {
+                    case "-d":
+                    case "--detach":
+                    case "--rm":
+                    case "-it":
+                    case "-i":
+                    case "-t":
+                        // Ignore execution flags
+                        break;
+                    
+                    case "--name":
+                        if (i + 1 < args.Count) containerName = StripQuotes(args[++i]);
+                        break;
+
+                    case "-p":
+                    case "--publish":
+                        if (i + 1 < args.Count) ports.Add(StripQuotes(args[++i]));
+                        break;
+
+                    case "-v":
+                    case "--volume":
+                        if (i + 1 < args.Count) volumes.Add(StripQuotes(args[++i]));
+                        break;
+                    
+                    case "-e":
+                    case "--env":
+                        if (i + 1 < args.Count) envVars.Add(StripQuotes(args[++i]));
+                        break;
+                    
+                    case "--restart":
+                        if (i + 1 < args.Count) restartPolicy = StripQuotes(args[++i]);
+                        break;
+                        
+                    case "--network":
+                        if (i + 1 < args.Count) network = StripQuotes(args[++i]);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // Found image
+                imageName = StripQuotes(arg);
+                imageFound = true;
+            }
+        }
+
+        if (string.IsNullOrEmpty(imageName))
+        {
+            throw new ArgumentException("Could not identify image name.");
+        }
+
+        // Build YAML
+        var sb = new StringBuilder();
+        sb.AppendLine("version: '3.8'");
+        sb.AppendLine("services:");
+        sb.AppendLine($"  {containerName}:");
+        sb.AppendLine($"    image: {imageName}");
+        
+        if (!string.IsNullOrEmpty(restartPolicy))
+        {
+            sb.AppendLine($"    restart: {restartPolicy}");
+        }
+
+        if (ports.Count > 0)
+        {
+            sb.AppendLine("    ports:");
+            foreach (var p in ports)
+            {
+                sb.AppendLine($"      - \"{p}\"");
+            }
+        }
+
+        if (volumes.Count > 0)
+        {
+            sb.AppendLine("    volumes:");
+            foreach (var v in volumes)
+            {
+                sb.AppendLine($"      - {v}");
+            }
+        }
+
+        if (envVars.Count > 0)
+        {
+            sb.AppendLine("    environment:");
+            foreach (var e in envVars)
+            {
+                // Handle different env formats: KEY=VAL or just KEY
+                sb.AppendLine($"      - {e}");
+            }
+        }
+
+        if (!string.IsNullOrEmpty(network))
+        {
+             sb.AppendLine("    networks:");
+             sb.AppendLine($"      - {network}");
+        }
+
+        if (cmdArgs.Count > 0)
+        {
+            sb.Append("    command:");
+            foreach (var c in cmdArgs)
+            {
+                sb.Append($" {c}");
+            }
+            sb.AppendLine();
+        }
+
+        // If we added specific network, we usually need to declare it at bottom
+        if (!string.IsNullOrEmpty(network) && network != "host" && network != "bridge" && network != "none")
+        {
+            sb.AppendLine();
+            sb.AppendLine("networks:");
+            sb.AppendLine($"  {network}:");
+            sb.AppendLine("    driver: bridge");
+        }
+
+        return sb.ToString();
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(outputText))
+        {
+            await ClipboardService.WriteTextAsync(outputText);
+        }
+    }
+}
